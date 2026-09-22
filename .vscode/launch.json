@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run: Streamlit app",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": ["run", "app.py"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Run: Smoke test (synthetic images)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/smoke_test.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Land-Cover Classifier</title>
+  <link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-wrap">
+        <div class="brand-mark">◌</div>
+        <div class="brand-copy">
+          <div class="brand-line">Land-Cover</div>
+          <div class="brand-line">Classifier</div>
+        </div>
+      </div>
+
+      <div class="side-panel upload-box" id="dropzone">
+        <div class="small-label">INPUT</div>
+        <div class="upload-title">Upload Image</div>
+        <div class="upload-sub">GeoTIFF, PNG, JPEG</div>
+        <input id="fileInput" type="file" accept=".jpg,.jpeg,.png,.tif,.tiff" hidden>
+        <button id="browseBtn" type="button">Browse</button>
+      </div>
+
+      <div class="side-panel">
+        <div class="small-label">PIPELINE</div>
+        <label>Resolution</label>
+        <select id="resolution"></select>
+        <label>Noise</label>
+        <select id="kernel"></select>
+        <label>Contrast</label>
+        <select id="contrast"></select>
+        <label>Sharpen</label>
+        <select id="sharpen"></select>
+      </div>
+
+      <div class="side-panel compact-classes">
+        <div class="small-label">CLASSES</div>
+        <ul id="classList" class="class-list"></ul>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="topbar">
+        <div>
+          <div class="crumbs">Land-Cover Classifier</div>
+          <div class="subtitle">Digital Image Processing</div>
+        </div>
+        <div class="topbar-right">
+          <div class="status-pill" id="statusPill">● Ready</div>
+          <button id="rerunBtn" class="rerun-btn" type="button">Re-run</button>
+        </div>
+      </header>
+
+      <div id="empty-state" class="empty-state">
+        <h3>Upload a Satellite Image</h3>
+        <p>Drop your image here or browse using the sidebar. Supported: JPG, PNG, TIFF</p>
+      </div>
+
+      <div id="results" class="results hidden">
+        <section class="content-section">
+          <div class="section-header-row">
+            <div class="section-title-wrap">
+              <h2>1. Input</h2>
+              <span class="tech-tag">SOURCE L1TP</span>
+            </div>
+            <div class="header-status">● Status: Validated Radiometric Profile</div>
+          </div>
+
+          <div class="input-grid">
+            <div class="card image-card">
+              <img id="inputImg" alt="Uploaded satellite preview">
+              <div class="image-footer">
+                <span class="mini-tag" id="miniFileTag">TIFF</span>
+                <span class="mini-meta" id="imgMetaText">Zoom Inspection</span>
+              </div>
+            </div>
+
+            <div class="card metadata-card">
+              <div class="meta-header">
+                <div class="meta-title">Metadata</div>
+              </div>
+
+              <div class="meta-table">
+                <div class="meta-row"><span>Filename</span><strong id="m-filename">Not available</strong></div>
+                <div class="meta-row"><span>Resolution</span><strong id="m-res">Not available</strong></div>
+                <div class="meta-row"><span>Format</span><strong id="m-format">Not available</strong></div>
+                <div class="meta-row"><span>Channels</span><strong id="m-channels">Not available</strong></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-header-row section-header-inline">
+            <div class="section-title-wrap">
+              <h2>2. Processing</h2>
+              <span class="tech-tag green">5 STAGES · DETERMINISTIC</span>
+            </div>
+          </div>
+
+          <div class="stage-grid" id="stagesGrid"></div>
+
+          <div class="histogram-block">
+            <div class="hist-header">
+              <div class="hist-title">Histogram</div>
+              <div class="legend"><span class="legend-swatch dashed"></span>Original <span class="legend-swatch solid"></span>Enhanced</div>
+            </div>
+            <div class="hist-grid" id="histGrid"></div>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-header-row section-header-inline">
+            <div class="section-title-wrap">
+              <h2>3. Features</h2>
+              <span class="tech-tag blue">COLOR • ENTROPY • DYNAMICS</span>
+            </div>
+          </div>
+
+          <div class="feature-layout" id="featureGrid"></div>
+          <div class="note-box">Texture and Spatial matrices computed internally by classification rules; not GLCM co-occurrence / distance matrices highlighted.</div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-header-row section-header-inline">
+            <div class="section-title-wrap">
+              <h2>4. Result</h2>
+              <span class="tech-tag green">PRIMARY RESULT</span>
+            </div>
+          </div>
+
+          <div class="result-card">
+            <div class="result-left">
+              <div class="kicker">PREDICTED LAND COVER</div>
+              <div class="result-class-row">
+                <div id="resultClass" class="result-class">FOREST</div>
+                <div class="result-badge" id="resultBadge">🌲</div>
+              </div>
+              <div id="resultCode" class="result-code">Rule-based classification</div>
+            </div>
+
+            <div class="result-mid">
+              <div class="kicker">Rule-Based Confidence</div>
+              <div class="confidence-row">
+                <span id="confVal">97%</span>
+                <span class="small-muted" id="confMeta">Consistent</span>
+              </div>
+              <div class="confidence-bar"><span id="confBar"></span></div>
+              <div class="confidence-foot"><span>Threshold: &gt;= 75%</span><strong id="confState">Consistent</strong></div>
+            </div>
+
+            <div class="result-right">
+              <div class="kicker">RESIDUAL UNCERTAINTY</div>
+              <div id="uncVal" class="uncertainty-value">3 percentage points</div>
+              <div class="small-muted" id="uncMeta">Based on score margin</div>
+            </div>
+          </div>
+
+          <div class="evidence-panel">
+            <div class="evidence-header">
+              <div class="result-subtitle">Evidence</div>
+              <div class="small-muted">Scores across classes.</div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Score</th>
+                  <th>Indicator</th>
+                  <th>Margin</th>
+                </tr>
+              </thead>
+              <tbody id="evidenceTable"></tbody>
+            </table>
+            <div class="footnote">Note: Scores are not probabilities.</div>
+          </div>
+        </section>
+
+        <section class="content-section">
+          <div class="section-header-row section-header-inline">
+            <div class="section-title-wrap">
+              <h2>5. Why</h2>
+              <span class="tech-tag blue">DECISION TRAIL</span>
+            </div>
+          </div>
+          <div class="subheader">Decision trail from image features.</div>
+          <div id="reasons" class="reasons"></div>
+        </section>
+      </div>
+
+      <p class="error hidden" id="errorBox"></p>
+    </main>
+  </div>
+
+  <script src="script.js?v=6"></script>
+</body>
+</html>
